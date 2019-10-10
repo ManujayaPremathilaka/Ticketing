@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class DBHelper extends SQLiteOpenHelper {
@@ -57,7 +58,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public String getUser(String userName, String password){
-        database = getWritableDatabase();
+        database = getReadableDatabase();
 
         String projection[] = {
                 UsersMaster.User._ID,
@@ -85,5 +86,62 @@ public class DBHelper extends SQLiteOpenHelper {
         else {
             return null;
         }
+    }
+
+    public ArrayList getAllMessages(){
+        ArrayList list = new ArrayList();
+
+        database = getReadableDatabase();
+
+        String projection[] = {
+                UsersMaster.Message.SUBJECT
+        };
+
+        String sortOrder = " DESC ";
+
+        Cursor cursor = database.query(
+                UsersMaster.Message.TABLE_NAME,
+                projection,
+                null,
+                null,
+                null,
+                null,
+                sortOrder
+        );
+
+        while (cursor.moveToNext()){
+            list.add(cursor.getString(cursor.getColumnIndexOrThrow(UsersMaster.Message.SUBJECT)));
+        }
+
+        return list;
+    }
+
+    public String getMessage(String subject){
+        String message = null;
+
+        database = getReadableDatabase();
+
+        String projection[] = {
+                UsersMaster.Message.MESSAGE
+        };
+
+        String selection = UsersMaster.Message.SUBJECT + " = ? ";
+        String selectionArgs[] = {subject};
+
+        Cursor cursor = database.query(
+                UsersMaster.Message.TABLE_NAME,
+                projection,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                null
+        );
+
+        while (cursor.moveToFirst()){
+            message = cursor.getString(cursor.getColumnIndexOrThrow(UsersMaster.Message.MESSAGE));
+        }
+
+        return message;
     }
 }
